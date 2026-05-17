@@ -1,0 +1,31 @@
+{# >>> Comp Settings #}
+{% set compDefaults = {
+  data: {
+    name: 's-text',
+    text: '',
+  },
+  classes: {
+    root: 'container m-top-md',
+    custom: '',
+  },
+} %}
+
+{# >>> Merge data / classes #}
+{% set props = {
+  data: data is defined and data is iterable ? compDefaults.data | merge(data) : compDefaults.data,
+  classes: classes is defined and classes is iterable ? compDefaults.classes | merge(classes) : compDefaults.classes,
+} %}
+
+{% if props.data.text %}
+  <div class="{{ props.data.name }} {{ props.classes.root }} {{ props.classes.custom }}">
+    {{ include('_components/text/text.twig', {
+      data: {
+        text: props.data.text,
+        raw: true,
+      },
+      classes: {
+        custom: 'col-span-full',
+      }
+    }, with_context = false) }}
+  </div>
+{% endif %}

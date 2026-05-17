@@ -1,0 +1,65 @@
+{# >>> Comp Settings #}
+{% set compDefaults = {
+  data: {
+    name: 'contentBuilder',
+    contentQuery: null,
+  },
+  classes: {
+    root: '',
+    custom: '',
+  },
+} %}
+
+{# >>> Merge data / classes #}
+{% set props = {
+  data: data is defined and data is iterable ? compDefaults.data | merge(data) : compDefaults.data,
+  classes: classes is defined and classes is iterable ? compDefaults.classes | merge(classes) : compDefaults.classes,
+} %}
+
+{% if props.data.contentQuery %}
+  <div class="{{ props.data.name }} {{ props.classes.root }} {{ props.classes.custom }}">
+    {% for matrixBlock in props.data.contentQuery.eagerly().all() %}
+      {% set data = null %}
+
+      {% switch matrixBlock.type.handle %}
+
+        {# -- Text Section -- #}
+      {% case 'text' %}
+        {% set data = {
+          text: matrixBlock.searchableRichText ??? '',
+        } %}
+
+        {# -- Image Section -- #}
+      {% case 'image' %}
+        {% set data = {
+          image: matrixBlock.image.eagerly().one() ??? null,
+          showCaption: true,
+        } %}
+
+        {# -- Image and Text Section -- #}
+      {% case 'imageAndText' %}
+        {% set data = {
+          image: matrixBlock.image.eagerly().one() ??? null,
+          showCaption: true,
+          text: matrixBlock.searchableRichText ??? '',
+          switched: matrixBlock.lightSwitch ??? false,
+          link: matrixBlock.linkBase ??? null,
+        } %}
+
+        {# -- Link Component -- #}
+      {% case 'link' %}
+        {% set data = {
+          link: matrixBlock.linkBase ??? null,
+        } %}
+
+      {% endswitch %}
+
+      {% if data is not null %}
+        {{ include('_sections/' ~ matrixBlock.type.handle ~ '/' ~ matrixBlock.type.handle ~ '.twig', {
+          data: data,
+        }, with_context = false) }}
+      {% endif %}
+
+    {% endfor %}
+  </div>
+{% endif %}

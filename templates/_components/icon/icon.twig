@@ -1,0 +1,36 @@
+{# >>> Comp Defaults #}
+{% set compDefaults = {
+  data: {
+    name: 'c-icon',
+    icon: '',
+    variant: 'base',
+    attributes: {},
+  },
+  classes: {
+    root: 'inline-flex origin-center',
+    custom: '',
+    color: '',
+    hoverEffect: '',
+  },
+  variants: {
+    size: {
+      auto: '',
+      small: 'w-5 h-5',
+      base: 'w-6 h-6',
+      xl: 'w-12 h-12',
+    }
+  }
+} %}
+
+{# >>> Merge data / classes / variants (optional) #}
+{% set props = {
+  data: data is defined and data is iterable ? compDefaults.data|merge(data) : compDefaults.data,
+  classes: classes is defined and classes is iterable ? compDefaults.classes|merge(classes) : compDefaults.classes,
+  variants: compDefaults.variants
+} %}
+
+{% if props.data.icon %}
+  {{ svg("@webroot/dist/images/svg/" ~ props.data.icon ~ ".svg")|attr(props.data.attributes|merge({
+    class: props.data.name ~ " " ~ props.classes.root ~ " " ~ props.variants.size[props.data.variant] ??? ''
+    ~ " " ~ props.classes.color ~ " " ~ props.classes.hoverEffect ~ " " ~  props.classes.custom  })) }}
+{% endif %}
